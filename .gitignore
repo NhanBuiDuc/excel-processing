@@ -1,0 +1,17 @@
+.DS_Store
+node_modules
+/build
+/.svelte-kit
+/package
+.env
+.env.*
+!.env.example
+.vercel
+.output
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+src/lib/db/BCTNV-T03-23.Final.xlsx
+src/lib/db/Danh_sach_lop_Lop01.xlsx
+src/lib/db/Danh_sach_lop_Lop02.xlsx
+src/lib/db/NewAttendance.xlsx
