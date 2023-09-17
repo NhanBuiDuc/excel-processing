@@ -7,6 +7,9 @@ declare global {
 		// interface PageData {}
 		// interface Platform {}
 	}
+	// Mới thêm vào
+	declare module '*.numbers' { const data: string; export default data; }
+	declare module '*.xlsx'    { const data: string; export default data; }
 }
 
 export {};
