@@ -1,4 +1,6 @@
+import { read, utils } from 'xlsx';
 import xlsx from 'xlsx';
+
 import fs from 'fs';
 import unorm from 'unorm';
 import { attributeMappings, attributeOrder } from './keyword_mapping.js';
@@ -225,8 +227,8 @@ export function checkHeaderFile(
 		return false;
 	}
 
-	console.log('Main header:', mainHeader);
-	console.log('Sub header:', subHeader);
+	// console.log('Main header:', mainHeader);
+	// console.log('Sub header:', subHeader);
 
 	return true;
 }
@@ -725,18 +727,22 @@ export function getDatesMonthAndWeekdays() {
 
 	return { dates, weekdaysVietnamese };
 }
-
+import b64 from './template.xlsx';
 export async function writeDataToTemplate(dataItem, attendance_date) {
-	const templatePath = './src/lib/Attendance.xlsx';
-	const newFilePath = './src/lib/Attendance_tenplate.xlsx';
-
 	try {
-		// Step 1: Load the template file using exceljs.
-		const workbook = new ExcelJS.Workbook();
-		await workbook.xlsx.readFile(templatePath);
+		// // Step 1: Load the template file using exceljs.
+		// const sheetjs_workbook = read(b64);
+		// const buffer = xlsx.write(sheetjs_workbook, { type: 'buffer', bookType: 'xlsx' });
+		// // read from a stream
 
+		const buffer = Buffer.from(b64, 'base64');
+
+		const workbook = new ExcelJS.Workbook();
+		await workbook.xlsx.load(buffer);
+		// await workbook.xlsx.readFile(templatePath);
 		// Step 2: Get the target worksheet.
-		const worksheet = workbook.getWorksheet('Sheet1'); // Replace 'Sheet1' with the actual sheet name.
+		// const worksheet = workbook.Sheets['Sheet1'];
+		const worksheet = workbook.getWorksheet('Sheet1');
 		let rowIndex = 3; // Start from the 3rd row
 
 		// Step 3: Get the dates and weekdays
@@ -1044,13 +1050,337 @@ export async function writeDataToTemplate(dataItem, attendance_date) {
 		worksheet.mergeCells(1, colIndex, 2, colIndex);
 		worksheet.getColumn(colIndex).width = 20; // Adjust the width as needed
 		// Step 14: Save the new workbook to a new file.
-		await workbook.xlsx.writeFile(newFilePath);
-		console.log('Data written to the new file:', newFilePath);
+		// await workbook.xlsx.writeFile('test.csv');
 		return workbook;
 	} catch (error) {
 		console.error('Error writing data to the new file:', error);
 	}
 }
+// export async function writeDataToTemplate(dataItem, attendance_date) {
+// 	const templatePath = './src/lib/db/Attendance.xlsx';
+// 	const newFilePath = './src/lib/Attendance_tenplate.xlsx';
+
+// 	try {
+// 		// Step 1: Load the template file using exceljs.
+// 		const workbook = new ExcelJS.Workbook();
+// 		await workbook.xlsx.readFile(templatePath);
+
+// 		// Step 2: Get the target worksheet.
+// 		const worksheet = workbook.getWorksheet('Sheet1'); // Replace 'Sheet1' with the actual sheet name.
+// 		let rowIndex = 3; // Start from the 3rd row
+
+// 		// Step 3: Get the dates and weekdays
+// 		const { attendance_dates, weekdaysVietnamese } = getAttendanceDatesAndWeekdays(attendance_date);
+
+// 		let rowCount = dataItem.length; // Count the number of students
+// 		// Output the row count in the second row, second column
+// 		const studentCountCell = worksheet.getCell(2, 2);
+// 		studentCountCell.value = `Sĩ số: ${rowCount}`;
+// 		// Step 4: Loop through each element in dataItem and write the student, father, and mother data to the new worksheet.
+// 		for (const data of dataItem) {
+// 			const studentData = data.student;
+// 			const fatherData = data.father[0];
+// 			const motherData = data.mother[0];
+
+// 			const flatData = flattenData(studentData, fatherData, motherData);
+// 			// Call the function to modify the flattenedData array
+// 			const modifiedData = modifyFlattenedData(flatData);
+
+// 			// Write the modifiedData to the worksheet starting from the 3rd column (C)
+// 			let colIndex = 0; // Start from column C
+// 			for (const value of modifiedData) {
+// 				const cell = worksheet.getCell(rowIndex, colIndex + 1);
+// 				cell.value = value;
+// 				colIndex++;
+// 			}
+
+// 			rowIndex++; // Move to the next row for the next data set
+// 		}
+
+// 		// Step 5: Write the dates and weekdays to the first and second rows of the worksheet starting from column AB (column index 27)
+// 		let colIndex = 27; // Start from column AB (column index 27)
+// 		for (const date of attendance_dates) {
+// 			const day = new Date(date).getDate().toString().padStart(2, '0');
+// 			const cell = worksheet.getCell(1, colIndex + 1);
+// 			cell.value = day;
+// 			cell.alignment = { horizontal: 'center' };
+// 			worksheet.getColumn(colIndex + 1).width = 5; // Set column width to 5 (adjust as needed)
+// 			colIndex++;
+// 		}
+
+// 		colIndex = 27; // Start from column AB (column index 27)
+// 		for (const weekday of weekdaysVietnamese) {
+// 			const cell = worksheet.getCell(2, colIndex + 1);
+// 			cell.value = weekday;
+// 			cell.alignment = { horizontal: 'center' };
+// 			if (weekday === 'T7') {
+// 				cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } }; // Set red fill for T7
+// 			}
+// 			colIndex++;
+// 		}
+// 		const attendancesStartColumnIndex = 28;
+// 		const attendancesEndColumnIndex = attendancesStartColumnIndex + attendance_dates.length - 1;
+
+// 		// Step 6: Write "Tăng ca /n T(Current month)/(Current year)" to the first row, centered, spanning two columns
+// 		const mergedCell = worksheet.getCell(1, colIndex + 1, 1, colIndex + 2);
+// 		mergedCell.value = `Tăng ca T${(new Date().getMonth() + 1)
+// 			.toString()
+// 			.padStart(2, '0')}/${new Date().getFullYear()}`;
+// 		mergedCell.alignment = { horizontal: 'center', vertical: 'middle' };
+// 		mergedCell.fill = {
+// 			type: 'pattern',
+// 			pattern: 'solid',
+// 			fgColor: { argb: 'ebb134' } // Use your desired color code
+// 		};
+// 		const gioColIndex = attendancesEndColumnIndex + 1;
+
+// 		// Step 7: Merge cells for "giờ" and "ăn tối" sub-columns, and set their values
+// 		const hourCell = worksheet.getCell(2, colIndex + 1);
+// 		hourCell.value = 'Giờ';
+// 		hourCell.alignment = { horizontal: 'center' };
+
+// 		const anToiCollIndex = gioColIndex + 1;
+// 		const dinnerCell = worksheet.getCell(2, colIndex + 2);
+// 		dinnerCell.value = 'Ăn tối';
+// 		dinnerCell.alignment = { horizontal: 'center' };
+
+// 		worksheet.mergeCells(1, colIndex + 1, 1, colIndex + 2);
+// 		colIndex += 3;
+// 		const phepColIndex = colIndex;
+
+// 		const phepCell = worksheet.getCell(2, colIndex);
+// 		phepCell.value = 'Phép';
+// 		phepCell.alignment = { horizontal: 'center' };
+// 		phepCell.fill = {
+// 			type: 'pattern',
+// 			pattern: 'solid',
+// 			fgColor: { argb: 'FF0000' } // Use your desired color code
+// 		};
+// 		for (let rowIndex = 3; rowIndex <= rowCount; rowIndex++) {
+// 			const formula = `=COUNTIF(${excelColumnName(
+// 				attendancesStartColumnIndex
+// 			)}${rowIndex}:${excelColumnName(attendancesEndColumnIndex)}${rowIndex},"P")`;
+// 			const formulaCell = worksheet.getCell(rowIndex, colIndex);
+// 			formulaCell.value = { formula };
+// 		}
+// 		colIndex++;
+// 		// Step 7: Write "CÁC KHOẢN PHẢI THU T05/2023"
+// 		const headerCell = worksheet.getCell(1, colIndex);
+// 		headerCell.value = `CÁC KHOẢN PHẢI THU T${(new Date().getMonth() + 1)
+// 			.toString()
+// 			.padStart(2, '0')}/${new Date().getFullYear()}`;
+// 		headerCell.alignment = { horizontal: 'center' };
+// 		worksheet.mergeCells(1, colIndex, 1, colIndex + 9);
+// 		headerCell.fill = {
+// 			type: 'pattern',
+// 			pattern: 'solid',
+// 			fgColor: { argb: 'FFA500' } // Use your desired color code
+// 		};
+
+// 		// Step 8: Write the subheader
+// 		const subheader = [
+// 			'NỢ T03',
+// 			'TC T03',
+// 			'CSVC',
+// 			'ĐP',
+// 			'Học toán',
+// 			'Năng khiếu',
+// 			'A.V',
+// 			'Aerobic',
+// 			'Tiền ăn T04',
+// 			'HPT04'
+// 		];
+// 		const subHeaderStartIndex = colIndex;
+// 		const subHeaderEndIndex = subHeaderStartIndex + subheader.length - 1;
+// 		for (let i = 0; i < subheader.length; i++) {
+// 			const cell = worksheet.getCell(2, colIndex + i);
+// 			cell.value = subheader[i];
+// 			cell.alignment = { horizontal: 'center' };
+// 			cell.fill = {
+// 				type: 'pattern',
+// 				pattern: 'solid',
+// 				fgColor: { argb: '46a642' } // Use your desired color code
+// 			};
+// 			worksheet.getColumn(colIndex + 1 + i).width = 12;
+// 		}
+// 		// TC T03 formula
+// 		for (let rowIndex = 3; rowIndex <= rowCount; rowIndex++) {
+// 			const formula = `=${excelColumnName(gioColIndex)}${rowIndex}*10+${excelColumnName(
+// 				anToiCollIndex
+// 			)}${rowIndex}*10`;
+// 			const cell = worksheet.getCell(rowIndex, colIndex + 1);
+// 			cell.value = { formula };
+// 		}
+// 		colIndex += 10;
+// 		const truTienAnIndex = colIndex;
+// 		// Step 9: Create a merged cell spanning two rows and one column for "Trừ tiền ăn"
+// 		const mergedCellTruTienAn = worksheet.getCell(1, colIndex, 2, colIndex + 1);
+// 		mergedCellTruTienAn.value = 'Trừ tiền ăn';
+// 		mergedCellTruTienAn.alignment = { horizontal: 'center', vertical: 'middle' };
+// 		mergedCellTruTienAn.border = { top: { style: 'thin' }, bottom: { style: 'thin' } };
+// 		mergedCellTruTienAn.fill = {
+// 			type: 'pattern',
+// 			pattern: 'solid',
+// 			fgColor: { argb: 'FFA500' } // Use your desired color code
+// 		};
+// 		worksheet.mergeCells(1, colIndex, 2, colIndex);
+
+// 		// Adjust the column width
+// 		worksheet.getColumn(colIndex).width = 15; // Adjust the width as needed
+// 		// Step 10: Add the formula "=+BH4*30" in the "Trừ tiền ăn" column for each row
+// 		for (let rowIndex = 3; rowIndex <= rowCount; rowIndex++) {
+// 			const formula = `=+${excelColumnName(phepColIndex)}${rowIndex}*30`;
+// 			const formulaCell = worksheet.getCell(rowIndex, colIndex);
+// 			formulaCell.value = { formula };
+// 		}
+// 		colIndex++;
+// 		const tongThuThangColIndex = colIndex;
+// 		// Step 12: Write "TỔNG" at the first row
+// 		const tongCell = worksheet.getCell(1, colIndex);
+// 		tongCell.value = 'TỔNG';
+// 		tongCell.alignment = { horizontal: 'center', vertical: 'middle' };
+// 		tongCell.font = { bold: true };
+// 		tongCell.fill = {
+// 			type: 'pattern',
+// 			pattern: 'solid',
+// 			fgColor: { argb: '8842a6' } // Use your desired color code
+// 		};
+// 		// Step 13: Write "Thu T(current Month)" at the second row
+// 		const thuCell = worksheet.getCell(2, colIndex);
+// 		thuCell.value = `THU T${(new Date().getMonth() + 1).toString().padStart(2, '0')}`;
+// 		thuCell.alignment = { horizontal: 'center', vertical: 'middle' };
+// 		thuCell.font = { bold: true };
+// 		thuCell.fill = {
+// 			type: 'pattern',
+// 			pattern: 'solid',
+// 			fgColor: { argb: '8842a6' } // Use your desired color code
+// 		};
+// 		worksheet.getColumn(colIndex).width = 15; // Adjust the width as needed
+
+// 		// Add the formula =SUM(BI4:BR4)-BS4 in the "Tổng / Thu Tháng" column for each row
+// 		for (let rowIndex = 3; rowIndex <= rowCount; rowIndex++) {
+// 			const totalFormula = `=SUM(${excelColumnName(
+// 				subHeaderStartIndex
+// 			)}${rowIndex}:${excelColumnName(subHeaderEndIndex)}${rowIndex})-${excelColumnName(
+// 				truTienAnIndex
+// 			)}${rowIndex}`;
+// 			const totalCell = worksheet.getCell(rowIndex, colIndex);
+// 			totalCell.value = { formula: totalFormula };
+// 		}
+// 		// Step 14 Add more
+// 		colIndex++;
+// 		const cellSo1ColIndex = colIndex;
+// 		const mergedCellSo1 = worksheet.getCell(1, colIndex, 2, colIndex + 1);
+// 		mergedCellSo1.value = 'SỐ 2/03';
+// 		mergedCellSo1.alignment = { horizontal: 'center', vertical: 'middle' };
+// 		mergedCellSo1.border = { top: { style: 'thin' }, bottom: { style: 'thin' } };
+// 		mergedCellSo1.fill = {
+// 			type: 'pattern',
+// 			pattern: 'solid',
+// 			fgColor: { argb: '425da6' } // Use your desired color code
+// 		};
+// 		worksheet.mergeCells(1, colIndex, 2, colIndex);
+// 		worksheet.getColumn(colIndex).width = 15; // Adjust the width as needed
+// 		colIndex++;
+// 		const mergedCellSo2 = worksheet.getCell(1, colIndex, 2, colIndex + 1);
+// 		mergedCellSo2.value = 'SỐ 1/04';
+// 		mergedCellSo2.alignment = { horizontal: 'center', vertical: 'middle' };
+// 		mergedCellSo2.fill = {
+// 			type: 'pattern',
+// 			pattern: 'solid',
+// 			fgColor: { argb: '425da6' } // Use your desired color code
+// 		};
+// 		worksheet.mergeCells(1, colIndex, 2, colIndex);
+// 		worksheet.getColumn(colIndex).width = 15; // Adjust the width as needed
+// 		colIndex++;
+// 		const mergedCellSo3 = worksheet.getCell(1, colIndex, 2, colIndex + 1);
+// 		mergedCellSo3.value = 'SỐ 2/04';
+// 		mergedCellSo3.alignment = { horizontal: 'center', vertical: 'middle' };
+// 		mergedCellSo3.fill = {
+// 			type: 'pattern',
+// 			pattern: 'solid',
+// 			fgColor: { argb: '425da6' } // Use your desired color code
+// 		};
+// 		worksheet.mergeCells(1, colIndex, 2, colIndex);
+// 		worksheet.getColumn(colIndex).width = 15; // Adjust the width as needed
+// 		const cellSo3ColIndex = colIndex;
+// 		// Step 15: Add "Đã Thu"
+// 		colIndex++;
+// 		const daThuColIndex = colIndex;
+// 		const mergedCellDaThu = worksheet.getCell(1, colIndex, 2, colIndex + 1);
+// 		mergedCellDaThu.value = 'ĐÃ THU';
+// 		mergedCellDaThu.alignment = { horizontal: 'center', vertical: 'middle' };
+// 		mergedCellDaThu.fill = {
+// 			type: 'pattern',
+// 			pattern: 'solid',
+// 			fgColor: { argb: 'a64258' } // Use your desired color code
+// 		};
+// 		worksheet.mergeCells(1, colIndex, 2, colIndex);
+// 		worksheet.getColumn(colIndex).width = 20; // Adjust the width as needed
+
+// 		// Formula for đã thu
+
+// 		for (let rowIndex = 3; rowIndex <= rowCount; rowIndex++) {
+// 			// Generate the formula to calculate the total
+// 			const totalFormula = `=SUM(${excelColumnName(cellSo1ColIndex)}${rowIndex}:${excelColumnName(
+// 				cellSo3ColIndex
+// 			)}${rowIndex})`;
+
+// 			// Get the cell in which you want to place the formula
+// 			const totalCell = worksheet.getCell(rowIndex, colIndex);
+
+// 			// Set the formula to the cell
+// 			totalCell.value = { formula: totalFormula };
+// 		}
+
+// 		// Step 16 Còn Nợ cell
+// 		colIndex++;
+// 		const mergedCellConNo = worksheet.getCell(1, colIndex, 2, colIndex + 1);
+// 		mergedCellConNo.value = 'CÒN NỢ';
+// 		mergedCellConNo.alignment = { horizontal: 'center', vertical: 'middle' };
+// 		mergedCellConNo.fill = {
+// 			type: 'pattern',
+// 			pattern: 'solid',
+// 			fgColor: { argb: 'FFA500' } // Use your desired color code
+// 		};
+// 		worksheet.mergeCells(1, colIndex, 2, colIndex);
+// 		worksheet.getColumn(colIndex).width = 20; // Adjust the width as needed
+
+// 		// Formula for CÒN NỢ
+
+// 		for (let rowIndex = 3; rowIndex <= rowCount; rowIndex++) {
+// 			// Generate the formula to calculate the total
+// 			const formula = `=${excelColumnName(tongThuThangColIndex)}${rowIndex}-${excelColumnName(
+// 				daThuColIndex
+// 			)}${rowIndex}`;
+// 			const cell = worksheet.getCell(rowIndex, colIndex);
+// 			// Set the formula to the cell
+// 			cell.value = { formula: formula };
+// 		}
+
+// 		// Step 17 Ghi Chú
+// 		colIndex++;
+// 		const mergedCellGhiChu = worksheet.getCell(1, colIndex, 2, colIndex + 1);
+// 		mergedCellGhiChu.value = 'GHI CHÚ';
+// 		mergedCellGhiChu.alignment = { horizontal: 'center', vertical: 'middle' };
+// 		// Set text color
+// 		mergedCellGhiChu.font = { color: { argb: '0000FF' } };
+// 		// Set cell color
+// 		mergedCellGhiChu.fill = {
+// 			type: 'pattern',
+// 			pattern: 'solid',
+// 			fgColor: { argb: '46a642' } // Use your desired color code
+// 		};
+// 		worksheet.mergeCells(1, colIndex, 2, colIndex);
+// 		worksheet.getColumn(colIndex).width = 20; // Adjust the width as needed
+// 		// Step 14: Save the new workbook to a new file.
+// 		// await workbook.xlsx.writeFile(newFilePath);
+// 		// console.log('Data written to the new file:', newFilePath);
+// 		return workbook;
+// 	} catch (error) {
+// 		console.error('Error writing data to the new file:', error);
+// 	}
+// }
 function excelColumnName(index) {
 	let columnName = '';
 	while (index > 0) {
@@ -1060,9 +1390,49 @@ function excelColumnName(index) {
 	}
 	return columnName;
 }
-export async function writeAttendance(dataItem, wanted_date, attendance_dates, weekdaysVietnamese) {
-	const templatePath = './src/lib/Attendance.xlsx';
-	const newFilePath = './src/lib/NewAttendance.xlsx';
+// export async function writeAttendance(dataItem, wanted_date, attendance_dates, weekdaysVietnamese) {
+// 	const templatePath = './src/lib/Attendance.xlsx';
+// 	const newFilePath = './src/lib/NewAttendance.xlsx';
+// 	try {
+// 		let workbook = await writeDataToTemplate(dataItem, wanted_date);
+
+// 		// Step 2: Get the target worksheet.
+// 		const worksheet = workbook.getWorksheet('Sheet1'); // Replace 'Sheet1' with the actual sheet name.
+// 		let rowIndex = 3; // Start from the 3rd row
+
+// 		// Step 4: Get the dates and weekdays
+// 		const number_of_date = attendance_dates.length;
+// 		// Step 3: Loop through each element in dataItem and write the student, father, and mother data to the new worksheet.
+// 		for (const data of dataItem) {
+// 			// const studentData = data.student;
+// 			// const fatherData = data.father[0];
+// 			// const motherData = data.mother[0];
+
+// 			// const flatData = flattenData(studentData, fatherData, motherData);
+// 			// Call the function to modify the flattenedData array
+// 			// let modifiedData = modifyFlattenedData(flatData);
+// 			// modifiedData = modifiedData.concat(attendanceData);
+// 			const attendanceData = data.attendance_status;
+// 			// Write the modifiedData to the worksheet starting from the 3rd column (C)
+// 			let colIndex = 28; // Start from column AB (column index 27)
+// 			for (const value of attendanceData) {
+// 				const cell = worksheet.getCell(rowIndex, colIndex);
+// 				cell.value = value;
+// 				colIndex++;
+// 			}
+// 			rowIndex++; // Move to the next row for the next data set
+// 		}
+
+// 		// Step 8: Save the new workbook to a new file.
+// 		await workbook.xlsx.writeFile(newFilePath);
+// 		console.log('Data written to the new file:', newFilePath);
+// 		return workbook;
+// 	} catch (error) {
+// 		console.error('Error writing data to the new file:', error);
+// 	}
+// }
+
+export async function writeAttendance(dataItem, wanted_date) {
 	try {
 		let workbook = await writeDataToTemplate(dataItem, wanted_date);
 
@@ -1070,18 +1440,8 @@ export async function writeAttendance(dataItem, wanted_date, attendance_dates, w
 		const worksheet = workbook.getWorksheet('Sheet1'); // Replace 'Sheet1' with the actual sheet name.
 		let rowIndex = 3; // Start from the 3rd row
 
-		// Step 4: Get the dates and weekdays
-		const number_of_date = attendance_dates.length;
 		// Step 3: Loop through each element in dataItem and write the student, father, and mother data to the new worksheet.
 		for (const data of dataItem) {
-			// const studentData = data.student;
-			// const fatherData = data.father[0];
-			// const motherData = data.mother[0];
-
-			// const flatData = flattenData(studentData, fatherData, motherData);
-			// Call the function to modify the flattenedData array
-			// let modifiedData = modifyFlattenedData(flatData);
-			// modifiedData = modifiedData.concat(attendanceData);
 			const attendanceData = data.attendance_status;
 			// Write the modifiedData to the worksheet starting from the 3rd column (C)
 			let colIndex = 28; // Start from column AB (column index 27)
@@ -1092,10 +1452,6 @@ export async function writeAttendance(dataItem, wanted_date, attendance_dates, w
 			}
 			rowIndex++; // Move to the next row for the next data set
 		}
-
-		// Step 8: Save the new workbook to a new file.
-		await workbook.xlsx.writeFile(newFilePath);
-		console.log('Data written to the new file:', newFilePath);
 		return workbook;
 	} catch (error) {
 		console.error('Error writing data to the new file:', error);

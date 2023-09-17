@@ -12,8 +12,8 @@ import {
 	writeAttendance,
 	getAttendanceDatesAndWeekdays,
 	getDatesMonthAndWeekdays,
-	readDataAndAttendance,
-	readExcelFileFromBuffer
+	readDataAndAttendance
+	// readExcelFileFromBuffer
 } from './util.js';
 import { insertClassRoom } from './class_room.js';
 import { getParentsByStudentId } from './parent.js';
@@ -770,15 +770,82 @@ export async function exportAttendanceTemplate(branch_id, class_room_id, attenda
 	mergedData = convertDataToDictionary(mergedData);
 	// Get the current date
 	const currentDate = getCurrentDate();
-	console.log('Current Date:', currentDate);
+	// console.log('Current Date:', currentDate);
 
 	// Calculate start_date and end_date based on the current date
 	const { start_date, end_date } = calculateDates(attendance_date);
-	console.log('Start Date:', start_date);
-	console.log('End Date:', end_date);
+	// console.log('Start Date:', start_date);
+	// console.log('End Date:', end_date);
 	insertAttendance(class_room_id, start_date, end_date);
-	writeDataToTemplate(mergedData, attendance_date);
+	return writeDataToTemplate(mergedData, attendance_date);
 }
+// export async function exportAttendance(branch_id, class_room_id, date) {
+// 	try {
+// 		// Step 1: Fetch student data for the provided branch_id and class_room_id
+// 		let studentData = await getStudentsFromClassroom(branch_id, class_room_id);
+// 		const studentIds = studentData.map((student) => student.id);
+
+// 		// Step 2: Fetch parent data for the retrieved studentIds
+// 		let parentData = await getParentsByStudentId(studentIds);
+
+// 		// Step 3: Merge student and parent data based on student_id
+// 		let mergedData = mergeStudentParentData(studentData, parentData);
+// 		mergedData = convertDataToDictionary(mergedData);
+
+// 		// Step 4: Get the current date and dates of the month
+// 		const { attendance_dates, weekdaysVietnamese } = getAttendanceDatesAndWeekdays(date);
+// 		// Calculate start_date and end_date based on the current date
+// 		const { start_date, end_date } = calculateDates(date);
+// 		console.log('Start Date:', start_date);
+// 		console.log('End Date:', end_date);
+
+// 		// Step 5: Get the current attendance for the classroom based on the start_date and end_date
+// 		let currentAttendance = await getCurrentAttendance(class_room_id, start_date, end_date);
+
+// 		if (!currentAttendance) {
+// 			// If current attendance does not exist, insert a new one
+// 			console.log('Current attendance does not exist. Inserting a new attendance record...');
+// 			await insertAttendance(class_room_id, start_date, end_date);
+// 			currentAttendance = await getCurrentAttendance(class_room_id, start_date, end_date);
+// 		}
+
+// 		// Step 6: Get the attendance_id and attendance_event based on the currentAttendance
+// 		let attendance_id = currentAttendance['id'];
+// 		let attendance_event = await getAllAttendanceEventsByAttendanceId(attendance_id);
+
+// 		// Step 7: Create the attendanceStatusMapping and update it based on attendance_event
+// 		const attendanceStatusMapping = {};
+
+// 		const days = Object.values(attendance_dates); // Map student_id to their attendance status array
+// 		for (const event of attendance_event) {
+// 			const eventDate = event.date; // Convert the date format to match 'YYYY-MM-DD'
+// 			const index = attendance_dates.indexOf(eventDate); // Find the index of the day in the days array
+// 			if (index !== -1) {
+// 				const studentId = event.student_id;
+// 				if (!attendanceStatusMapping[studentId]) {
+// 					attendanceStatusMapping[studentId] = Array(days.length).fill('1');
+// 				}
+// 				attendanceStatusMapping[studentId][index] = event.status;
+// 			}
+// 		}
+
+// 		// Step 8: Update the attendance_status for each student in mergedData
+// 		mergedData.forEach((student) => {
+// 			const studentId = student.student.id;
+// 			if (attendanceStatusMapping[studentId]) {
+// 				student.attendance_status = attendanceStatusMapping[studentId];
+// 			} else {
+// 				// If attendance status array doesn't exist for the student, add an empty array
+// 				student.attendance_status = Array(attendance_dates.length).fill('1');
+// 			}
+// 		});
+
+// 		// Step 9: Write data and attendance to a file or perform any other required actions
+// 		writeAttendance(mergedData, date, attendance_dates, weekdaysVietnamese);
+// 	} catch (error) {
+// 		console.error('Error exporting attendance:', error);
+// 	}
+// }
 export async function exportAttendance(branch_id, class_room_id, date) {
 	try {
 		// Step 1: Fetch student data for the provided branch_id and class_room_id
@@ -841,7 +908,7 @@ export async function exportAttendance(branch_id, class_room_id, date) {
 		});
 
 		// Step 9: Write data and attendance to a file or perform any other required actions
-		writeAttendance(mergedData, date, attendance_dates, weekdaysVietnamese);
+		return writeAttendance(mergedData, date);
 	} catch (error) {
 		console.error('Error exporting attendance:', error);
 	}
