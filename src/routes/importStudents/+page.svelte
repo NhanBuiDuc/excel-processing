@@ -23,7 +23,7 @@
 		<input type="text" id="worksheet-name" name="worksheet_name" placeholder="Sheet1" required />
 		<div class="stack">
 			<ComboBox
-				label="Choose Class Room To Import Student List"
+				label="Chọn lớp học"
 				name="class_room_id"
 				placeholder="Type to search..."
 				options={class_room_data}
