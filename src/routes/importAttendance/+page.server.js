@@ -1,6 +1,10 @@
 import { fail } from '@sveltejs/kit';
 import * as classroom from '$lib/db/class_room';
+<<<<<<< HEAD
 import { importAttendanceFile } from '../../lib/db/excel';
+=======
+import { importStudentListFile } from '../../lib/db/excel';
+>>>>>>> 005f5a27c730815b97bf20b535e4c6e9638557bf
 import { read } from 'xlsx';
 /** @type {import('./$types').PageServerLoad} */
 
@@ -24,9 +28,15 @@ export const actions = {
 		let branch_id = 1; //code cứng
 		const data = await request.formData();
 		const classRoomId = parseInt(data.get('class_room_id'), 10);
+<<<<<<< HEAD
 		const fromDateString = data.get('fromDate');
 		const dateObject = parseDateStringToDate(fromDateString);
 		const worksheet_name = data.get('worksheet_name');
+=======
+		console.log('classs id: ', classRoomId);
+		const worksheet_name = data.get('worksheet_name');
+		console.log('worksheet: ', worksheet_name);
+>>>>>>> 005f5a27c730815b97bf20b535e4c6e9638557bf
 		const file = data.get('file-upload');
 		const fileTypes = ['.xlsx', '.xls', '.xlsm', '.csv'];
 		let includesFileType = false;
@@ -58,7 +68,11 @@ export const actions = {
 			const worksheet = workbook.Sheets[worksheet_name];
 
 			// Call your 'importAttendanceFile' function with the 'worksheet' data
+<<<<<<< HEAD
 			importAttendanceFile(worksheet, classRoomId, branch_id, dateObject);
+=======
+			importStudentListFile(worksheet, classRoomId, branch_id);
+>>>>>>> 005f5a27c730815b97bf20b535e4c6e9638557bf
 
 			return { success: true };
 		} catch (error) {
@@ -67,6 +81,7 @@ export const actions = {
 		}
 	}
 };
+<<<<<<< HEAD
 function parseDateStringToDate(dateString) {
 	const parts = dateString.split('/');
 	const day = parseInt(parts[0], 10); // Parse the day as an integer
@@ -78,3 +93,5 @@ function parseDateStringToDate(dateString) {
 
 	return date;
 }
+=======
+>>>>>>> 005f5a27c730815b97bf20b535e4c6e9638557bf

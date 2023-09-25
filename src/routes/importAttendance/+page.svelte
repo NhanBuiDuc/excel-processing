@@ -3,6 +3,7 @@
 	export let data;
 	const { class_room_data } = data;
 	import ComboBox from '../../lib/components/ComboBox.svelte';
+<<<<<<< HEAD
 	function generateMonthData(numMonths) {
 		const currentDate = new Date();
 		let currentMonth = currentDate.getMonth() + 1; // Month is zero-based, so add 1
@@ -51,6 +52,9 @@
 
 	// Usage example:
 	const fromDateData = generateMonthData(7);
+=======
+
+>>>>>>> 005f5a27c730815b97bf20b535e4c6e9638557bf
 	export let form;
 </script>
 
@@ -75,6 +79,7 @@
 				placeholder="Type to search..."
 				options={class_room_data}
 			/>
+<<<<<<< HEAD
 			<ComboBox
 				label="Chọn khoảng thời gian"
 				name="fromDate"
@@ -82,6 +87,8 @@
 				options={fromDateData}
 				readonly={false}
 			/>
+=======
+>>>>>>> 005f5a27c730815b97bf20b535e4c6e9638557bf
 		</div>
 		<button type="submit">Upload</button>
 	</form>
