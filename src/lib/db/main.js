@@ -18,10 +18,4 @@ const customDate = new Date('2023-01-01');
 await importStudentListFile(filePath, sheetName, class_room_id, branch_id);
 await exportAttendanceTemplate(branch_id, class_room_id, currentDate);
 await exportAttendance(branch_id, class_room_id, currentDate);
-await importAttendanceFile(
-	'src/lib/NewAttendance.xlsx',
-	sheetName,
-	class_room_id,
-	branch_id,
-	currentDate
-);
+await importAttendanceFile(sheetName, class_room_id, branch_id, currentDate);

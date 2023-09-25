@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import * as classroom from '$lib/db/class_room';
-import { exportAttendanceTemplate } from '../../lib/db/excel';
+import { exportAttendance } from '../../lib/db/excel';
 import { read, utils, writeFileXLSX } from 'xlsx';
 
 /** @type {import('./$types').PageServerLoad} */
@@ -24,9 +24,10 @@ export const actions = {
 		let branch_id = 1; //code cứng
 		const data = await request.formData();
 		const classRoomId = parseInt(data.get('class_room_id'), 10);
-		let currentMonth = new Date();
+		const fromDateString = data.get('fromDate');
+		const dateObject = parseDateStringToDate(fromDateString);
 		try {
-			let workbook = await exportAttendanceTemplate(branch_id, classRoomId, currentMonth);
+			let workbook = await exportAttendance(branch_id, classRoomId, dateObject);
 			let buffer = await workbook.xlsx.writeBuffer();
 			let base64String = Buffer.from(buffer).toString('base64');
 			// const sheetjs_workbook = read(buffer);
@@ -37,3 +38,14 @@ export const actions = {
 		}
 	}
 };
+function parseDateStringToDate(dateString) {
+	const parts = dateString.split('/');
+	const month = parseInt(parts[0], 10); // Parse the month as an integer
+	const day = parseInt(parts[1], 10); // Parse the day as an integer
+	const year = parseInt(parts[2], 10); // Parse the year as an integer
+
+	// Create a Date object (months are zero-based, so subtract 1 from the month)
+	const date = new Date(year, month - 1, day);
+
+	return date;
+}

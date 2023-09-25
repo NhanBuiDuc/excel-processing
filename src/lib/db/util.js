@@ -774,7 +774,7 @@ export async function writeDataToTemplate(dataItem, attendance_date) {
 		}
 
 		// Step 5: Write the dates and weekdays to the first and second rows of the worksheet starting from column AB (column index 27)
-		let colIndex = 27; // Start from column AB (column index 27)
+		let colIndex = 28; // Start from column AB (column index 27)
 		for (const date of attendance_dates) {
 			const day = new Date(date).getDate().toString().padStart(2, '0');
 			const cell = worksheet.getCell(1, colIndex + 1);
@@ -784,7 +784,7 @@ export async function writeDataToTemplate(dataItem, attendance_date) {
 			colIndex++;
 		}
 
-		colIndex = 27; // Start from column AB (column index 27)
+		colIndex = 28; // Start from column AB (column index 27)
 		for (const weekday of weekdaysVietnamese) {
 			const cell = worksheet.getCell(2, colIndex + 1);
 			cell.value = weekday;

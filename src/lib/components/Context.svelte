@@ -59,8 +59,8 @@
 	}
 
 	.ui :global(.icon) {
-		width: 24px;
-		height: 24px;
+		width: 1rem;
+		height: 1rem;
 		fill: none;
 		stroke: currentColor;
 		stroke-width: 2;
