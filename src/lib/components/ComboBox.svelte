@@ -250,11 +250,11 @@
 							<slot name="option" {option}>
 								{option.text}
 							</slot>
-							{#if option.value === value}
-								<svg viewBox="0 0 24 24" class="icon">
+							<!-- {#if option.value === value}
+								<svg viewBox="0 0 2 2" class="icon">
 									<polyline points="20 6 9 17 4 12" />
 								</svg>
-							{/if}
+							{/if} -->
 						</li>
 					{/each}
 				{:else}
@@ -271,11 +271,11 @@
 						<slot name="option" {option}>
 							{option.text}
 						</slot>
-						{#if option.value === value}
+						<!-- {#if option.value === value}
 							<svg viewBox="0 0 24 24" class="icon">
 								<polyline points="20 6 9 17 4 12" />
 							</svg>
-						{/if}
+						{/if} -->
 					</li>
 				{/if}
 			{:else}

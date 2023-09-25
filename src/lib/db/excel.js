@@ -768,10 +768,6 @@ export async function exportAttendanceTemplate(branch_id, class_room_id, attenda
 	// Merge student and parent data based on student_id
 	let mergedData = mergeStudentParentData(studentData, parentData);
 	mergedData = convertDataToDictionary(mergedData);
-	// Get the current date
-	const currentDate = getCurrentDate();
-	// console.log('Current Date:', currentDate);
-
 	// Calculate start_date and end_date based on the current date
 	const { start_date, end_date } = calculateDates(attendance_date);
 	// console.log('Start Date:', start_date);
@@ -846,6 +842,7 @@ export async function exportAttendanceTemplate(branch_id, class_room_id, attenda
 // 		console.error('Error exporting attendance:', error);
 // 	}
 // }
+
 export async function exportAttendance(branch_id, class_room_id, date) {
 	try {
 		// Step 1: Fetch student data for the provided branch_id and class_room_id

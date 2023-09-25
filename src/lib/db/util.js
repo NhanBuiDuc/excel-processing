@@ -774,7 +774,7 @@ export async function writeDataToTemplate(dataItem, attendance_date) {
 		}
 
 		// Step 5: Write the dates and weekdays to the first and second rows of the worksheet starting from column AB (column index 27)
-		let colIndex = 27; // Start from column AB (column index 27)
+		let colIndex = 28; // Start from column AB (column index 27)
 		for (const date of attendance_dates) {
 			const day = new Date(date).getDate().toString().padStart(2, '0');
 			const cell = worksheet.getCell(1, colIndex + 1);
@@ -784,7 +784,7 @@ export async function writeDataToTemplate(dataItem, attendance_date) {
 			colIndex++;
 		}
 
-		colIndex = 27; // Start from column AB (column index 27)
+		colIndex = 28; // Start from column AB (column index 27)
 		for (const weekday of weekdaysVietnamese) {
 			const cell = worksheet.getCell(2, colIndex + 1);
 			cell.value = weekday;
@@ -799,7 +799,7 @@ export async function writeDataToTemplate(dataItem, attendance_date) {
 
 		// Step 6: Write "Tăng ca /n T(Current month)/(Current year)" to the first row, centered, spanning two columns
 		const mergedCell = worksheet.getCell(1, colIndex + 1, 1, colIndex + 2);
-		mergedCell.value = `Tăng ca T${(new Date().getMonth() + 1)
+		mergedCell.value = `Tăng ca T${(attendance_date.getMonth() + 1)
 			.toString()
 			.padStart(2, '0')}/${new Date().getFullYear()}`;
 		mergedCell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -842,7 +842,7 @@ export async function writeDataToTemplate(dataItem, attendance_date) {
 		colIndex++;
 		// Step 7: Write "CÁC KHOẢN PHẢI THU T05/2023"
 		const headerCell = worksheet.getCell(1, colIndex);
-		headerCell.value = `CÁC KHOẢN PHẢI THU T${(new Date().getMonth() + 1)
+		headerCell.value = `CÁC KHOẢN PHẢI THU T${(attendance_date.getMonth() + 1)
 			.toString()
 			.padStart(2, '0')}/${new Date().getFullYear()}`;
 		headerCell.alignment = { horizontal: 'center' };
@@ -923,7 +923,7 @@ export async function writeDataToTemplate(dataItem, attendance_date) {
 		};
 		// Step 13: Write "Thu T(current Month)" at the second row
 		const thuCell = worksheet.getCell(2, colIndex);
-		thuCell.value = `THU T${(new Date().getMonth() + 1).toString().padStart(2, '0')}`;
+		thuCell.value = `THU T${(attendance_date.getMonth() + 1).toString().padStart(2, '0')}`;
 		thuCell.alignment = { horizontal: 'center', vertical: 'middle' };
 		thuCell.font = { bold: true };
 		thuCell.fill = {
