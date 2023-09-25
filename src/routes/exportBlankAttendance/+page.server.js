@@ -40,13 +40,8 @@ export const actions = {
 };
 function parseDateStringToDate(dateString) {
 	const parts = dateString.split('/');
-<<<<<<< HEAD
 	const day = parseInt(parts[0], 10); // Parse the day as an integer
 	const month = parseInt(parts[1], 10); // Parse the month as an integer
-=======
-	const month = parseInt(parts[0], 10); // Parse the month as an integer
-	const day = parseInt(parts[1], 10); // Parse the day as an integer
->>>>>>> 005f5a27c730815b97bf20b535e4c6e9638557bf
 	const year = parseInt(parts[2], 10); // Parse the year as an integer
 
 	// Create a Date object (months are zero-based, so subtract 1 from the month)
