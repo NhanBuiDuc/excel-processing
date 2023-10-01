@@ -8,7 +8,7 @@
 </script>
 
 {#if form?.error}
-	<h2>Failed to upload, wrong format!</h2>
+	<h2>{form?.message}</h2>
 {/if}
 
 {#if form?.success}
