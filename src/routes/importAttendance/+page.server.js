@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import * as classroom from '$lib/db/class_room';
 import { importAttendanceFile } from '../../lib/db/excel';
 import { read } from 'xlsx';
+import { invalidate } from '$app/navigation';
 /** @type {import('./$types').PageServerLoad} */
 
 export const load = async () => {
@@ -46,9 +47,15 @@ export const actions = {
 			worksheet_name === null ||
 			worksheet_name === undefined ||
 			Number.isNaN(worksheet_name) ||
-			!worksheet_name
+			!worksheet_name ||
+			fromDateString === '' ||
+			dateObject.toString() === 'Invalid Date'
 		)
-			return fail(500, { error: true });
+			return fail(500, {
+				error: true,
+				message:
+					'Xin hãy nhập định dạng .xlsx file excel, chọn lớp học, và nhập đúng tên của Excel Sheet'
+			});
 		try {
 			// Read the uploaded file as an array buffer
 			const arrayBuffer = await file.arrayBuffer();
@@ -56,14 +63,15 @@ export const actions = {
 
 			// Get the worksheet by name
 			const worksheet = workbook.Sheets[worksheet_name];
-
-			// Call your 'importAttendanceFile' function with the 'worksheet' data
-			importAttendanceFile(worksheet, classRoomId, branch_id, dateObject);
-
-			return { success: true };
+			if (worksheet === undefined) {
+				return fail(500, { error: true, message: 'Tên Sheet của file excel không tồn tại' });
+			} else {
+				// Call your 'importAttendanceFile' function with the 'worksheet' data
+				return importAttendanceFile(worksheet, classRoomId, branch_id, dateObject);
+			}
 		} catch (error) {
 			console.error('Error processing the file:', error);
-			return fail(500, { error: true });
+			return fail(500, { error: true, message: error });
 		}
 	}
 };

@@ -8,11 +8,11 @@
 </script>
 
 {#if form?.error}
-	<h2>Failed to upload, wrong format!</h2>
+	<h2>{form?.message}</h2>
 {/if}
 
-{#if form?.success}
-	<h2>File Uploaded!</h2>
+{#if form?.error == false}
+	<h2>{form?.message}</h2>
 {/if}
 <h1>Upload File</h1>
 <div class="form">
@@ -27,6 +27,7 @@
 				name="class_room_id"
 				placeholder="Type to search..."
 				options={class_room_data}
+				required="true"
 			/>
 		</div>
 

@@ -257,7 +257,7 @@ export async function importStudentListFile(worksheet, class_room_id, branch_id)
 	);
 	if (!checkHeadersResult) {
 		console.error('Header check failed.');
-		return;
+		return { error: true, message: 'Những cột của file excel không đúng format cho trước!' };
 	} else {
 		headers = expectedMainHeader;
 		subHeaderRange = expectedSubHeader;
@@ -266,6 +266,7 @@ export async function importStudentListFile(worksheet, class_room_id, branch_id)
 	// const studentData = transformDataKeys(data, attributeMappings.student);
 
 	await insertStudentAndParent(data, class_room_id, branch_id);
+	return { error: false, message: 'Đã cập nhật danh sách học sinh' };
 }
 // export async function importAttendanceFile(filePath, sheetName, class_room_id, branch_id, date) {
 // 	let worksheet = readExcelFile(filePath, sheetName);
@@ -574,11 +575,7 @@ export async function importAttendanceFile(worksheet, class_room_id, branch_id, 
 		'Q1:S1', // Range of "THÔNG TIN MẸ" merged cells
 		'T1:V1' // Range of "THƯỜNG TRÚ" merged cells
 	];
-	let mainHeaderRange = 'A1:AA1';
 	let subHeaderRange = 'A2:AA2';
-
-	let headers = getRowValues(worksheet, mainHeaderRange);
-	let subheaders = getRowValues(worksheet, subHeaderRange);
 
 	let checkHeadersResult = checkHeaderFile(
 		worksheet,
@@ -590,7 +587,7 @@ export async function importAttendanceFile(worksheet, class_room_id, branch_id, 
 	);
 	if (!checkHeadersResult) {
 		console.error('Header check failed.');
-		return;
+		return { error: true, message: 'File excel không đúng format' };
 	} else {
 		headers = expectedMainHeader;
 		subHeaderRange = expectedSubHeader;
@@ -660,7 +657,7 @@ export async function importAttendanceFile(worksheet, class_room_id, branch_id, 
 			const { firstName, lastName, dob } = missingStudent.studentData;
 			console.error(`First Name: ${firstName}, Last Name: ${lastName}, DOB: ${dob}`);
 		}
-		return; // Return early if missing students are found
+		return { error: false, message: 'Danh sách sinh viên không đúng' }; // Return early if missing students are found
 	}
 	const absentDatesByStudent = studentAttendanceData.map((studentAttendanceData) => {
 		const absentDatesWithStatus = studentAttendanceData.attendanceStatus.reduce(
@@ -725,6 +722,7 @@ export async function importAttendanceFile(worksheet, class_room_id, branch_id, 
 	console.log('Unmatched records:', unmatchedRecords);
 
 	deleteAttendanceEvent(unmatchedRecords);
+	return { error: false, message: 'Nhập điểm danh thành công' };
 }
 
 function convertDataToDictionary(dataArr) {

@@ -24,14 +24,30 @@ export const actions = {
 		let branch_id = 1; //code cứng
 		const data = await request.formData();
 		const classRoomId = parseInt(data.get('class_room_id'), 10);
+		let classRoomData = await classroom.getClassRoomById(classRoomId);
+		const class_room_name = classRoomData[0].name;
 		const fromDateString = data.get('fromDate');
 		const dateObject = parseDateStringToDate(fromDateString);
+		const filename = 'DiemDanhLop' + class_room_name + 'Ngay' + fromDateString;
+		if (
+			classRoomId === null ||
+			classRoomId === undefined ||
+			Number.isNaN(classRoomId) ||
+			!classRoomId ||
+			fromDateString === '' ||
+			dateObject.toString() === 'Invalid Date'
+		)
+			return fail(500, {
+				error: true,
+				message:
+					'Xin hãy nhập định dạng .xlsx file excel, chọn lớp học, ngày tháng và nhập đúng tên của Excel Sheet'
+			});
 		try {
 			let workbook = await exportAttendanceTemplate(branch_id, classRoomId, dateObject);
 			let buffer = await workbook.xlsx.writeBuffer();
 			let base64String = Buffer.from(buffer).toString('base64');
 			// const sheetjs_workbook = read(buffer);
-			return { success: true, workbook: base64String };
+			return { success: true, workbook: base64String, filename: filename };
 		} catch (error) {
 			console.error('Error processing the file:', error);
 			return fail(500, { error: true });

@@ -151,6 +151,7 @@
 
 			return async ({ result, update }) => {
 				let buffer = result.data['workbook'];
+				let filename = result.data['filename'];
 				// Create a blob from the base64 string
 				const byteCharacters = atob(buffer);
 				const byteNumbers = new Array(byteCharacters.length);
@@ -168,7 +169,7 @@
 				// Create a link element to trigger the download
 				const a = document.createElement('a');
 				a.href = url;
-				a.download = 'excel_file.xlsx';
+				a.download = filename;
 				a.style.display = 'none';
 
 				// Append the link to the DOM and trigger the click event

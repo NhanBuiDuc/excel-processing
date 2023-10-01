@@ -31,3 +31,19 @@ export async function getAllClassRoomByBranchId(branch_id) {
 		return null;
 	}
 }
+// Function to get all attendance events by attendance_id
+export async function getClassRoomById(class_room_id) {
+	try {
+		// Replace 'attendance_events' with the name of your table that holds attendance events
+		const { data, error } = await supabase.from('class_room').select('*').eq('id', class_room_id);
+
+		if (error) {
+			throw new Error('Error while fetching class room data:', error.message);
+		}
+		return data;
+	} catch (error) {
+		// Handle any errors that might occur during the data retrieval process
+		console.error(error.message);
+		return null;
+	}
+}

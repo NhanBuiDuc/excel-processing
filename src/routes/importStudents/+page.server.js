@@ -46,27 +46,28 @@ export const actions = {
 			worksheet_name === null ||
 			worksheet_name === undefined ||
 			Number.isNaN(worksheet_name) ||
-			!worksheet_name
+			!worksheet_name ||
+			
 		)
 			return fail(500, {
 				error: true,
-				message: 'Xin hãy nhập file excel, chọn lớp học, và nhập đúng tên của Excel Sheet'
+				message:
+					'Xin hãy nhập định dạng .xlsx file excel, chọn lớp học, và nhập đúng tên của Excel Sheet'
 			});
 		try {
 			// Read the uploaded file as an array buffer
 			const arrayBuffer = await file.arrayBuffer();
 			const workbook = read(arrayBuffer);
-
-			// Get the worksheet by name
+			// Get the worksheet by sheet name
 			const worksheet = workbook.Sheets[worksheet_name];
-
-			// Call your 'importAttendanceFile' function with the 'worksheet' data
-			importStudentListFile(worksheet, classRoomId, branch_id);
-
-			return { success: true };
+			if (worksheet === undefined) {
+				return fail(500, { error: true, message: 'Tên Sheet của file excel không tồn tại' });
+			} else {
+				// Call your 'importAttendanceFile' function with the 'worksheet' data
+				return importStudentListFile(worksheet, classRoomId, branch_id);
+			}
 		} catch (error) {
-			console.error('Error processing the file:', error);
-			return fail(500, { error: true });
+			return fail(500, { error: true, message: error });
 		}
 	}
 };
