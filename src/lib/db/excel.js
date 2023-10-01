@@ -575,7 +575,11 @@ export async function importAttendanceFile(worksheet, class_room_id, branch_id, 
 		'Q1:S1', // Range of "THÔNG TIN MẸ" merged cells
 		'T1:V1' // Range of "THƯỜNG TRÚ" merged cells
 	];
+	let mainHeaderRange = 'A1:AA1';
 	let subHeaderRange = 'A2:AA2';
+
+	let headers = getRowValues(worksheet, mainHeaderRange);
+	// let subheaders = getRowValues(worksheet, subHeaderRange);
 
 	let checkHeadersResult = checkHeaderFile(
 		worksheet,
@@ -620,9 +624,18 @@ export async function importAttendanceFile(worksheet, class_room_id, branch_id, 
 	console.log('Start Date:', start_date);
 	console.log('End Date:', end_date);
 	let currentAttendance = await getCurrentAttendance(class_room_id, start_date, end_date);
+
+	if (!currentAttendance) {
+		// If current attendance does not exist, insert a new one
+		console.log('Current attendance does not exist. Inserting a new attendance record...');
+		await insertAttendance(class_room_id, start_date, end_date);
+		currentAttendance = await getCurrentAttendance(class_room_id, start_date, end_date);
+	}
+
 	let databaseStudentData = await getStudentsFromClassroom(branch_id, class_room_id);
 	let attendance_events = await getAllAttendanceEventsByAttendanceId(currentAttendance.id);
 	// Compare studentData with databaseStudentData
+	const exceedingStudents = [];
 	const missingStudents = [];
 	const validStudents = [];
 	for (const studentAttendanceRecord of studentAttendanceData) {
@@ -644,20 +657,63 @@ export async function importAttendanceFile(worksheet, class_room_id, branch_id, 
 		});
 
 		if (matchingStudent == undefined || matchingStudent == null) {
-			missingStudents.push(studentAttendanceRecord);
+			exceedingStudents.push(studentAttendanceRecord);
 		} else {
 			studentAttendanceRecord.studentData.id = matchingStudent.id;
 			validStudents.push(studentAttendanceRecord);
 		}
 	}
+	for (const databaseStudent of databaseStudentData) {
+		const { first_name, last_name, dob } = databaseStudent;
 
-	if (missingStudents.length > 0) {
-		console.error('Missing students from the database:');
-		for (const missingStudent of missingStudents) {
-			const { firstName, lastName, dob } = missingStudent.studentData;
-			console.error(`First Name: ${firstName}, Last Name: ${lastName}, DOB: ${dob}`);
+		// Check if there is a matching student in the input data
+		const matchingStudent = studentAttendanceData.find((studentAttendanceRecord) => {
+			const { studentData } = studentAttendanceRecord;
+			if (dob !== null && dob !== undefined) {
+				return (
+					studentData.first_name.trim() === first_name.trim() &&
+					studentData.last_name.trim() === last_name.trim() &&
+					studentData.dob !== null &&
+					studentData.dob.trim() === dob.trim()
+				);
+			} else {
+				return (
+					studentData.first_name.trim() === first_name.trim() &&
+					studentData.last_name.trim() === last_name.trim()
+				);
+			}
+		});
+
+		// If there is no matching student in the input data, add to missingStudents
+		if (matchingStudent == undefined || matchingStudent == null) {
+			missingStudents.push(databaseStudent);
 		}
-		return { error: false, message: 'Danh sách sinh viên không đúng' }; // Return early if missing students are found
+	}
+
+	if (exceedingStudents.length > 0) {
+		let printExceedingStudents = [];
+		for (const exceedingStudent of exceedingStudents) {
+			const { first_name, last_name, dob } = exceedingStudent.studentData;
+			console.error(`First Name: ${first_name}, Last Name: ${last_name}, DOB: ${dob}`);
+			printExceedingStudents.push(`\n${first_name} ${last_name}, NS: ${dob}\n`);
+		}
+		return {
+			error: true,
+			message: 'Danh sách học sinh trong file excel bị dư: ' + printExceedingStudents
+		}; // Return early if missing students are found
+	}
+	if (missingStudents.length > 0) {
+		let printMissingStudents = [];
+		for (const missingStudent of missingStudents) {
+			const { first_name, last_name, dob } = missingStudent;
+			console.error(`First Name: ${first_name}, Last Name: ${last_name}, DOB: ${dob}`);
+			printMissingStudents.push(`\n${first_name} ${last_name}, NS: ${dob}\n`);
+		}
+		return {
+			error: true,
+			message:
+				'Danh sách học sinh trong file excel không đầy đủ: ' + printMissingStudents.toString()
+		}; // Return early if missing students are found
 	}
 	const absentDatesByStudent = studentAttendanceData.map((studentAttendanceData) => {
 		const absentDatesWithStatus = studentAttendanceData.attendanceStatus.reduce(
