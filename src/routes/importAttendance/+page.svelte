@@ -59,7 +59,7 @@
 	<h2>{form?.message}</h2>
 {/if}
 
-{#if form?.error == false}
+{#if form?.error === false}
 	<h2>{form?.message}</h2>
 {/if}
 <h1>Upload File</h1>

@@ -25,19 +25,47 @@ export const actions = {
 		const data = await request.formData();
 		const classRoomId = parseInt(data.get('class_room_id'), 10);
 		let classRoomData = await classroom.getClassRoomById(classRoomId);
-		const class_room_name = classRoomData[0].name;
+		let class_room_name = '';
+		if (classRoomData !== null) class_room_name = classRoomData[0].name;
+		else {
+			return {
+				error: true,
+				workbook: null,
+				filename: null,
+				message: 'Xin hãy chọn lớp học'
+			};
+		}
 		const fromDateString = data.get('fromDate');
 		const dateObject = parseDateStringToDate(fromDateString);
 		const filename = 'DiemDanhLop' + class_room_name + 'Ngay' + fromDateString;
+		if (
+			classRoomId === null ||
+			classRoomId === undefined ||
+			Number.isNaN(classRoomId) ||
+			!classRoomId ||
+			fromDateString === '' ||
+			dateObject.toString() === 'Invalid Date'
+		)
+			return {
+				error: true,
+				workbook: null,
+				filename: null,
+				message: 'Xin hãy nhập ngày tháng, chọn lớp học'
+			};
 		try {
 			let workbook = await exportAttendance(branch_id, classRoomId, dateObject);
 			let buffer = await workbook.xlsx.writeBuffer();
 			let base64String = Buffer.from(buffer).toString('base64');
 			// const sheetjs_workbook = read(buffer);
-			return { success: true, workbook: base64String, filename: filename };
+			return {
+				error: false,
+				workbook: base64String,
+				filename: filename,
+				message: 'Tải thành công'
+			};
 		} catch (error) {
 			console.error('Error processing the file:', error);
-			return fail(500, { error: true });
+			return { error: true, message: error };
 		}
 	}
 };

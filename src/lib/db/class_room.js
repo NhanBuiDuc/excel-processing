@@ -43,7 +43,6 @@ export async function getClassRoomById(class_room_id) {
 		return data;
 	} catch (error) {
 		// Handle any errors that might occur during the data retrieval process
-		console.error(error.message);
 		return null;
 	}
 }

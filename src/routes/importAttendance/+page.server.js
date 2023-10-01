@@ -2,7 +2,6 @@ import { fail } from '@sveltejs/kit';
 import * as classroom from '$lib/db/class_room';
 import { importAttendanceFile } from '../../lib/db/excel';
 import { read } from 'xlsx';
-import { invalidate } from '$app/navigation';
 /** @type {import('./$types').PageServerLoad} */
 
 export const load = async () => {
