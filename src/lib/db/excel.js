@@ -697,9 +697,10 @@ export async function importAttendanceFile(worksheet, class_room_id, branch_id, 
 			console.error(`First Name: ${first_name}, Last Name: ${last_name}, DOB: ${dob}`);
 			printExceedingStudents.push(`\n${first_name} ${last_name}, NS: ${dob}\n`);
 		}
+		const exceedingStudentsMessage = printExceedingStudents.join('\n'); // Join the array
 		return {
 			error: true,
-			message: 'Danh sách học sinh trong file excel bị dư: ' + printExceedingStudents
+			message: 'Danh sách học sinh trong file excel bị dư: ' + exceedingStudentsMessage
 		}; // Return early if missing students are found
 	}
 	if (missingStudents.length > 0) {
@@ -709,10 +710,10 @@ export async function importAttendanceFile(worksheet, class_room_id, branch_id, 
 			console.error(`First Name: ${first_name}, Last Name: ${last_name}, DOB: ${dob}`);
 			printMissingStudents.push(`\n${first_name} ${last_name}, NS: ${dob}\n`);
 		}
+		const missingStudentsMessage = printMissingStudents.join('\n');
 		return {
 			error: true,
-			message:
-				'Danh sách học sinh trong file excel không đầy đủ: ' + printMissingStudents.toString()
+			message: 'Danh sách học sinh trong file excel không đầy đủ: ' + missingStudentsMessage
 		}; // Return early if missing students are found
 	}
 	const absentDatesByStudent = studentAttendanceData.map((studentAttendanceData) => {
