@@ -48,7 +48,10 @@ export const actions = {
 			Number.isNaN(worksheet_name) ||
 			!worksheet_name
 		)
-			return fail(500, { error: true });
+			return fail(500, {
+				error: true,
+				message: 'Xin hãy nhập file excel, chọn lớp học, và nhập đúng tên của Excel Sheet'
+			});
 		try {
 			// Read the uploaded file as an array buffer
 			const arrayBuffer = await file.arrayBuffer();
