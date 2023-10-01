@@ -1054,6 +1054,7 @@ export async function writeDataToTemplate(dataItem, attendance_date) {
 		return workbook;
 	} catch (error) {
 		console.error('Error writing data to the new file:', error);
+		return { error: error, message: 'Lỗi file' };
 	}
 }
 // export async function writeDataToTemplate(dataItem, attendance_date) {
