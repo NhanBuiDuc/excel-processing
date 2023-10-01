@@ -1,11 +1,8 @@
 <script>
 	import ComboBox from '../../lib/components/ComboBox.svelte';
-	import { writeFileXLSX } from 'xlsx';
-	import ExcelJS from 'exceljs';
 	/** @type {import('./$types').PageData} */
 	export let data;
 	import { enhance } from '$app/forms';
-	import Context from '$lib/components/Context.svelte';
 	const { class_room_data } = data;
 	const currentDate = new Date();
 	// Từ ngày 10 của tháng trước ngày hiện tại
@@ -15,74 +12,6 @@
 	const date4 = new Date(currentDate);
 	date4.setDate(9); // Đặt ngày là ngày 9 của tháng hiện tại
 	date4.setMonth(date4.getMonth() + 1); // Cộng một tháng để lấy tháng sau
-
-	function formatDateToString(date) {
-		const day = date.getDate();
-		const month = date.getMonth() + 1;
-		const year = date.getFullYear();
-		return (day < 10 ? '0' : '') + day + '/' + (month < 10 ? '0' : '') + month + '/' + year;
-	}
-
-	// function generateMonthData() {
-	// 	const currentDate = new Date();
-	// 	const currentMonth = currentDate.getMonth() + 1; // Month is zero-based, so add 1
-	// 	const currentYear = currentDate.getFullYear();
-	// 	const monthsData = [];
-
-	// 	// Calculate the months and years
-	// 	const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
-	// 	const twoPreviousMonth = currentMonth === 1 ? 11 : currentMonth - 2;
-	// 	const previousYear = currentMonth === 1 ? currentYear - 1 : currentYear;
-	// 	const nextMonth = currentMonth === 12 ? 1 : currentMonth + 1;
-	// 	const nextYear = currentMonth === 12 ? currentYear + 1 : currentYear;
-
-	// 	// Generate data for the two previous months
-	// 	monthsData.push({
-	// 		text: `${10}/${twoPreviousMonth}/${currentYear - 1} - ${9}/${previousMonth}/${previousYear}`,
-	// 		value: `${10}/${twoPreviousMonth} - ${9}/${previousMonth}`
-	// 	});
-
-	// 	// Generate data for the previous month
-	// 	monthsData.push({
-	// 		text: `${10}/${previousMonth}/${previousYear} - ${9}/${currentMonth}/${currentYear}`,
-	// 		value: `${10}/${previousMonth} - ${9}/${currentMonth}`
-	// 	});
-
-	// 	// Generate data for the current month
-	// 	monthsData.push({
-	// 		text: `${10}/${currentMonth}/${currentYear} - ${9}/${nextMonth}/${nextYear}`,
-	// 		value: `${10}/${currentMonth} - ${9}/${nextMonth}`
-	// 	});
-
-	// 	return monthsData;
-	// }
-	// function generateMonthData(numMonths) {
-	// 	const currentDate = new Date();
-	// 	let currentMonth = currentDate.getMonth() + 1; // Month is zero-based, so add 1
-	// 	let currentYear = currentDate.getFullYear();
-	// 	const monthsData = [];
-
-	// 	for (let i = 0; i < numMonths; i++) {
-	// 		// Calculate the months and years
-	// 		const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
-	// 		const twoPreviousMonth = currentMonth === 1 ? 11 : currentMonth - 2;
-	// 		const previousYear = currentMonth === 1 ? currentYear - 1 : currentYear;
-	// 		const nextMonth = currentMonth === 12 ? 1 : currentMonth + 1;
-	// 		const nextYear = currentMonth === 12 ? currentYear + 1 : currentYear;
-
-	// 		// Generate data for the current month and push it into monthsData array
-	// 		monthsData.push({
-	// 			text: `${10}/${previousMonth}/${previousYear} - ${9}/${currentMonth}/${currentYear}`,
-	// 			value: `${10}/${previousMonth} - ${9}/${currentMonth}`
-	// 		});
-
-	// 		// Update currentMonth and currentYear for the next iteration
-	// 		currentMonth = previousMonth;
-	// 		currentYear = previousYear;
-	// 	}
-
-	// 	return monthsData.reverse(); // Reverse the array to have the data in chronological order
-	// }
 
 	function generateMonthData(numMonths) {
 		const currentDate = new Date();
@@ -138,7 +67,15 @@
 </script>
 
 <h1>Tải file</h1>
+
 <div class="form">
+	{#if form?.error == true}
+		<h2>{form?.message}</h2>
+	{/if}
+
+	{#if form?.error === false}
+		<h2>{form?.message}</h2>
+	{/if}
 	<form
 		method="post"
 		action="?/download"
@@ -151,33 +88,39 @@
 
 			return async ({ result, update }) => {
 				let buffer = result.data['workbook'];
-				// Create a blob from the base64 string
-				const byteCharacters = atob(buffer);
-				const byteNumbers = new Array(byteCharacters.length);
-				for (let i = 0; i < byteCharacters.length; i++) {
-					byteNumbers[i] = byteCharacters.charCodeAt(i);
+				let filename = result.data['filename'];
+				if (buffer == null || filename == null) {
+					update({ reset: false });
+				} else {
+					// Create a blob from the base64 string
+					const byteCharacters = atob(buffer);
+					const byteNumbers = new Array(byteCharacters.length);
+					for (let i = 0; i < byteCharacters.length; i++) {
+						byteNumbers[i] = byteCharacters.charCodeAt(i);
+					}
+					const byteArray = new Uint8Array(byteNumbers);
+					const blob = new Blob([byteArray], {
+						type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'
+					});
+
+					// Create a temporary URL for the blob
+					const url = window.URL.createObjectURL(blob);
+
+					// Create a link element to trigger the download
+					const a = document.createElement('a');
+					a.href = url;
+					a.download = filename;
+					a.style.display = 'none';
+
+					// Append the link to the DOM and trigger the click event
+					document.body.appendChild(a);
+					a.click();
+
+					// Clean up by removing the link and revoking the blob URL
+					document.body.removeChild(a);
+					window.URL.revokeObjectURL(url);
+					update({ reset: false });
 				}
-				const byteArray = new Uint8Array(byteNumbers);
-				const blob = new Blob([byteArray], {
-					type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'
-				});
-
-				// Create a temporary URL for the blob
-				const url = window.URL.createObjectURL(blob);
-
-				// Create a link element to trigger the download
-				const a = document.createElement('a');
-				a.href = url;
-				a.download = 'excel_file.xlsx';
-				a.style.display = 'none';
-
-				// Append the link to the DOM and trigger the click event
-				document.body.appendChild(a);
-				a.click();
-
-				// Clean up by removing the link and revoking the blob URL
-				document.body.removeChild(a);
-				window.URL.revokeObjectURL(url);
 			};
 		}}
 	>

@@ -3,7 +3,6 @@
 	export let data;
 	const { class_room_data } = data;
 	import ComboBox from '../../lib/components/ComboBox.svelte';
-<<<<<<< HEAD
 	function generateMonthData(numMonths) {
 		const currentDate = new Date();
 		let currentMonth = currentDate.getMonth() + 1; // Month is zero-based, so add 1
@@ -52,18 +51,16 @@
 
 	// Usage example:
 	const fromDateData = generateMonthData(7);
-=======
 
->>>>>>> 005f5a27c730815b97bf20b535e4c6e9638557bf
 	export let form;
 </script>
 
 {#if form?.error}
-	<h2>Failed to upload, wrong format!</h2>
+	<h2>{form?.message}</h2>
 {/if}
 
-{#if form?.success}
-	<h2>File Uploaded!</h2>
+{#if form?.error === false}
+	<h2>{form?.message}</h2>
 {/if}
 <h1>Upload File</h1>
 <div class="form">
@@ -78,17 +75,16 @@
 				name="class_room_id"
 				placeholder="Type to search..."
 				options={class_room_data}
+				required="true"
 			/>
-<<<<<<< HEAD
 			<ComboBox
 				label="Chọn khoảng thời gian"
 				name="fromDate"
 				placeholder="Type to search..."
 				options={fromDateData}
 				readonly={false}
+				required="true"
 			/>
-=======
->>>>>>> 005f5a27c730815b97bf20b535e4c6e9638557bf
 		</div>
 		<button type="submit">Upload</button>
 	</form>

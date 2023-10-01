@@ -137,6 +137,13 @@
 	export let form;
 </script>
 
+{#if form?.error}
+	<h2>{form?.message}</h2>
+{/if}
+
+{#if form?.error == false}
+	<h2>{form?.message}</h2>
+{/if}
 <h1>Tải file</h1>
 <div class="form">
 	<form
@@ -151,33 +158,39 @@
 
 			return async ({ result, update }) => {
 				let buffer = result.data['workbook'];
-				// Create a blob from the base64 string
-				const byteCharacters = atob(buffer);
-				const byteNumbers = new Array(byteCharacters.length);
-				for (let i = 0; i < byteCharacters.length; i++) {
-					byteNumbers[i] = byteCharacters.charCodeAt(i);
+				let filename = result.data['filename'];
+				if (buffer == null || filename == null) {
+					update({ reset: false });
+				} else {
+					// Create a blob from the base64 string
+					const byteCharacters = atob(buffer);
+					const byteNumbers = new Array(byteCharacters.length);
+					for (let i = 0; i < byteCharacters.length; i++) {
+						byteNumbers[i] = byteCharacters.charCodeAt(i);
+					}
+					const byteArray = new Uint8Array(byteNumbers);
+					const blob = new Blob([byteArray], {
+						type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'
+					});
+
+					// Create a temporary URL for the blob
+					const url = window.URL.createObjectURL(blob);
+
+					// Create a link element to trigger the download
+					const a = document.createElement('a');
+					a.href = url;
+					a.download = filename;
+					a.style.display = 'none';
+
+					// Append the link to the DOM and trigger the click event
+					document.body.appendChild(a);
+					a.click();
+
+					// Clean up by removing the link and revoking the blob URL
+					document.body.removeChild(a);
+					window.URL.revokeObjectURL(url);
+					update({ reset: false });
 				}
-				const byteArray = new Uint8Array(byteNumbers);
-				const blob = new Blob([byteArray], {
-					type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'
-				});
-
-				// Create a temporary URL for the blob
-				const url = window.URL.createObjectURL(blob);
-
-				// Create a link element to trigger the download
-				const a = document.createElement('a');
-				a.href = url;
-				a.download = 'excel_file.xlsx';
-				a.style.display = 'none';
-
-				// Append the link to the DOM and trigger the click event
-				document.body.appendChild(a);
-				a.click();
-
-				// Clean up by removing the link and revoking the blob URL
-				document.body.removeChild(a);
-				window.URL.revokeObjectURL(url);
 			};
 		}}
 	>
