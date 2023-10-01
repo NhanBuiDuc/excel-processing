@@ -53,7 +53,7 @@ export const actions = {
 			return fail(500, {
 				error: true,
 				message:
-					'Xin hãy nhập định dạng .xlsx file excel, chọn lớp học, và nhập đúng tên của Excel Sheet'
+					'Xin hãy nhập định dạng .xlsx file excel, ngày tháng, lớp học, và nhập đúng tên của Excel Sheet'
 			});
 		try {
 			// Read the uploaded file as an array buffer

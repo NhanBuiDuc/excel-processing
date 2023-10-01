@@ -46,8 +46,7 @@ export const actions = {
 			worksheet_name === null ||
 			worksheet_name === undefined ||
 			Number.isNaN(worksheet_name) ||
-			!worksheet_name ||
-			
+			!worksheet_name
 		)
 			return fail(500, {
 				error: true,
@@ -61,13 +60,13 @@ export const actions = {
 			// Get the worksheet by sheet name
 			const worksheet = workbook.Sheets[worksheet_name];
 			if (worksheet === undefined) {
-				return fail(500, { error: true, message: 'Tên Sheet của file excel không tồn tại' });
+				return { error: true, message: 'Tên Sheet của file excel không tồn tại' };
 			} else {
 				// Call your 'importAttendanceFile' function with the 'worksheet' data
 				return importStudentListFile(worksheet, classRoomId, branch_id);
 			}
 		} catch (error) {
-			return fail(500, { error: true, message: error });
+			return { error: true, message: error };
 		}
 	}
 };
